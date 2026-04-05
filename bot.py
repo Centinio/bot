@@ -25,9 +25,6 @@ from aiogram.types import (
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 
-# ВАЖНО: замените на ваше имя пользователя PythonAnywhere
-PYANYWHERE_USERNAME = "Centi"  # <--- ИСПРАВЬТЕ, ЕСЛИ НУЖНО
-
 TON_ADDRESS = "UQAQvjOaN4l2KBzStCRnSlNhxZT8zNeLavQ-IMYgytRj0bxK"
 USDT_ADDRESS = "UQAQvjOaN4l2KBzStCRnSlNhxZT8zNeLavQ-IMYgytRj0bxK"
 USDT_JETTON = "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2b_s72"
@@ -50,7 +47,7 @@ logger = logging.getLogger(__name__)
 # БАЗА ДАННЫХ
 # ==============================
 
-DB_PATH = f"/home/{PYANYWHERE_USERNAME}/donations.db"
+DB_PATH = "donations.db"
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
