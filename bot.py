@@ -8,7 +8,6 @@ from decimal import Decimal, getcontext
 from io import BytesIO
 from datetime import datetime, timezone
 import qrcode
-from flask import Flask, request, jsonify
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import (
@@ -22,8 +21,6 @@ from aiogram.types import (
 # ==============================
 # НАСТРОЙКИ
 # ==============================
-
-app = Flask(__name__)
 
 TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
