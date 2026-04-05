@@ -312,25 +312,6 @@ async def back_to_main(callback: types.CallbackQuery):
     await callback.answer()
 
 # ==============================
-# FLASK WEBHOOK
-# ==============================
-
-@app.route(f'/webhook/{TOKEN}', methods=['POST'])
-async def webhook():
-    try:
-        update_data = request.get_json()
-        update = types.Update(**update_data)
-        await dp.feed_update(bot, update)
-        return jsonify({"status": "ok"}), 200
-    except Exception as e:
-        logger.error(f"Webhook error: {e}")
-        return jsonify({"status": "error"}), 500
-
-@app.route('/', methods=['GET'])
-def index():
-    return "Bot is running!", 200
-
-# ==============================
 # ЗАПУСК (для Render.com)
 # ==============================
 
