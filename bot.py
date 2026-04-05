@@ -334,22 +334,21 @@ def index():
     return "Bot is running!", 200
 
 # ==============================
-# ЗАПУСК
+# ЗАПУСК (для Render.com)
 # ==============================
 
-def setup_webhook():
-    webhook_url = f'https://{PYANYWHERE_USERNAME}.pythonanywhere.com/webhook/{TOKEN}'
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    result = loop.run_until_complete(bot.set_webhook(webhook_url))
-    if result:
-        logger.info(f"Webhook successfully set to {webhook_url}")
-    else:
-        logger.error("Failed to set webhook")
-    loop.close()
+async def main():
+    if not TOKEN:
+        raise ValueError("Установите BOT_TOKEN")
+    if ADMIN_ID == 0:
+        logger.warning("ADMIN_ID не задан, уведомления отправляться не будут")
 
-# Инициализация
-init_db()
-logger.info("Database initialized")
-setup_webhook()
-logger.info("Bot is ready on PythonAnywhere!")
+    init_db()
+    logger.info("Database initialized")
+    
+    # Запускаем polling вместо webhook
+    logger.info("Бот запущен...")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
