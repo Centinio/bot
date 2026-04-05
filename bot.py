@@ -255,13 +255,19 @@ async def generate_payment_info(message: types.Message, user_id: int):
     memo = f"{comment[:50]}_{memo_base}" if comment else memo_base
     encoded_memo = urllib.parse.quote(memo)
 
+    # --- НОВАЯ ПРОВЕРКА: убеждаемся, что сумма положительная ---
+    if amount <= 0:
+        await message.answer("❌ Сумма должна быть больше нуля. Пожалуйста, начните заново.", reply_markup=main_kb)
+        user_data.pop(user_id, None)
+        return
+
     if currency == "TON":
         address = TON_ADDRESS
         amount_param = int(amount * Decimal(1e9))
         qr_link = f"ton://transfer/{address}?amount={amount_param}&text={encoded_memo}"
         tg_wallet_link = f"https://t.me/wallet?startapp=transfer_{address}_{amount_param}_{encoded_memo}"
         keeper_link = f"https://app.tonkeeper.com/transfer/{address}?amount={amount_param}&text={encoded_memo}"
-    else:
+    else:  # USDT
         address = USDT_ADDRESS
         amount_param = int(amount * Decimal(1e6))
         qr_link = f"ton://transfer/{USDT_JETTON}?amount={amount_param}&jetton={address}&text={encoded_memo}"
@@ -273,17 +279,19 @@ async def generate_payment_info(message: types.Message, user_id: int):
             f"⚠️ *ВАЖНО*: при отправке обязательно укажите комментарий (memo)!")
 
     payment_kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💎 Wallet", url=tg_wallet_link),
+        [InlineKeyboardButton(text="💎 Telegram Wallet", url=tg_wallet_link),
          InlineKeyboardButton(text="🌐 TON Keeper", url=keeper_link)],
         [InlineKeyboardButton(text="ℹ️ Как оплатить?", callback_data="how_to_pay"),
          InlineKeyboardButton(text="🏠 Главное меню", callback_data="back_to_main")]
     ])
 
+    # --- Генерация QR-кода ---
     qr = qrcode.make(qr_link)
     bio = BytesIO()
     qr.save(bio, format="PNG")
     bio.seek(0)
     photo = BufferedInputFile(bio.getvalue(), filename="qr.png")
+
     await message.answer_photo(photo=photo, caption=text, parse_mode="Markdown", reply_markup=payment_kb)
 
     username = message.from_user.username
