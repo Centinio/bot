@@ -30,8 +30,8 @@ USDT_ADDRESS = "UQAQvjOaN4l2KBzStCRnSlNhxZT8zNeLavQ-IMYgytRj0bxK"
 USDT_JETTON = "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2b_s72"
 
 DESCRIPTION = (
-    "Тайный помощник собирает средства на благотворительность в Нюрнберге.\n\n"
-    "Каждый донат помогает. Спасибо ❤️"
+    "Сбор средств @operativnoZSU для скорейшей перемоги ЗСУ!\n\n"
+    "Каждое пожертвование приближает перемогу и спасает жизни наших бойцов. Спасибо 🤝"
 )
 
 getcontext().prec = 30
@@ -97,7 +97,7 @@ user_data = {}
 
 main_kb = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="💰 Донат")],
+        [KeyboardButton(text="🙏 Пожертвование")],
         [KeyboardButton(text="ℹ️ О проекте")]
     ],
     resize_keyboard=True
@@ -137,7 +137,7 @@ skip_kb = InlineKeyboardMarkup(inline_keyboard=[
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
-    await message.answer(f"Привет! 👋\n\n{DESCRIPTION}", reply_markup=main_kb)
+    await message.answer(f"Приветствуем неравнодушных! 🫡\n\n{DESCRIPTION}", reply_markup=main_kb)
 
 @dp.message(F.text == "ℹ️ О проекте")
 async def about(message: types.Message):
@@ -148,7 +148,7 @@ async def back_button(message: types.Message):
     user_id = message.from_user.id
     if user_id in user_data:
         user_data.pop(user_id)
-    await message.answer("Выберите валюту для пожертвования:", reply_markup=currency_kb)
+    await message.answer("Выберите криптовалюту для пожертвования:", reply_markup=currency_kb)
 
 @dp.message(F.text == "🏠 Главное меню")
 async def home_button(message: types.Message):
@@ -157,10 +157,10 @@ async def home_button(message: types.Message):
         user_data.pop(user_id)
     await message.answer("Главное меню:", reply_markup=main_kb)
 
-@dp.message(F.text == "💰 Донат")
+@dp.message(F.text == "🙏 Пожертвование")
 async def donate_start(message: types.Message):
     user_data[message.from_user.id] = {}
-    await message.answer("Выберите валюту для пожертвования:", reply_markup=currency_kb)
+    await message.answer("Выберите криптовалюту для пожертвования:", reply_markup=currency_kb)
 
 @dp.message(F.text.in_(["TON", "USDT"]))
 async def choose_currency(message: types.Message):
@@ -181,7 +181,7 @@ async def choose_amount_fixed(message: types.Message):
         return
     amount_str, currency_in_text = message.text.split()
     if currency_in_text != currency:
-        await message.answer("Ошибка: выберите сумму в валюте, которую вы указали.")
+        await message.answer("Ошибка: выберите сумму в криптовалюте, которую вы указали.")
         return
     try:
         amount = Decimal(amount_str)
@@ -221,7 +221,7 @@ async def handle_all(message: types.Message):
 
 async def ask_comment(message: types.Message, user_id: int):
     await message.answer(
-        "Вы можете добавить комментарий к платежу (будет указан в memo).\n"
+        "Вы можете добавить комментарий к платежу.\n"
         "Введите текст или нажмите 'Пропустить':",
         reply_markup=skip_kb
     )
@@ -306,7 +306,7 @@ async def how_to_pay(callback: types.CallbackQuery):
         "📷 *QR-код:* Отсканируйте в Telegram Wallet\n"
         "💎 *Wallet:* Скопируйте адрес кошелька, нажмите кнопку Wallet, выберите 'Вывести' и вставьте адрес\n"
         "🌐 *TON Keeper:* Нажмите кнопку и подтвердите перевод\n\n"
-        "После оплаты донат подтвердится вручную.",
+        "После оплаты пожертвование моментально будет зачислено на криптокошелек @operativnoZSU",
         parse_mode="Markdown"
     )
     await callback.answer()
