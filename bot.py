@@ -32,7 +32,68 @@ def health():
 
 def run_flask():
     flask_app.run(host='0.0.0.0', port=10000)
+    
+# ==============================
+# УВЕДОМЛЕНИЯ АДМИНИСТРАТОРУ
+# ==============================
+ADMIN_ID = int(os.getenv("ADMIN_ID", "973053690"))  # Ваш ID
 
+async def notify_admin_about_new_user(user_id: int, username: str, first_name: str, last_name: str = ""):
+    """Отправляет администратору уведомление о новом пользователе"""
+    # Формируем ссылку на профиль пользователя
+    if username:
+        profile_link = f"https://t.me/{username}"
+        username_text = f"@{username}"
+    else:
+        profile_link = f"tg://user?id={user_id}"
+        username_text = "нет username"
+    
+    full_name = f"{first_name} {last_name}".strip()
+    
+    message = (
+        f"🆕 *Новый пользователь!*\n\n"
+        f"👤 *Имя:* {full_name}\n"
+        f"🔗 *Username:* {username_text}\n"
+        f"🆔 *User ID:* `{user_id}`\n"
+        f"📎 *Ссылка:* [Открыть профиль]({profile_link})\n\n"
+        f"📅 *Дата:* {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}"
+    )
+    
+    try:
+        await bot.send_message(ADMIN_ID, message, parse_mode="Markdown")
+    except Exception as e:
+        logger.error(f"Не удалось отправить уведомление админу: {e}")
+
+# Функция для сохранения пользователя в БД (опционально)
+def save_user_to_db(user_id: int, username: str, first_name: str, last_name: str = ""):
+    """Сохраняет информацию о пользователе в базу данных"""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+                    user_id INTEGER PRIMARY KEY,
+                    username TEXT,
+                    first_name TEXT,
+                    last_name TEXT,
+                    first_seen TIMESTAMP,
+                    last_seen TIMESTAMP
+                )''')
+    
+    # Проверяем, есть ли уже такой пользователь
+    c.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
+    exists = c.fetchone()
+    
+    if exists:
+        # Обновляем время последнего визита
+        c.execute("UPDATE users SET last_seen = ? WHERE user_id = ?",
+                  (datetime.now(timezone.utc), user_id))
+    else:
+        # Добавляем нового пользователя
+        c.execute("INSERT INTO users (user_id, username, first_name, last_name, first_seen, last_seen) VALUES (?, ?, ?, ?, ?, ?)",
+                  (user_id, username, first_name, last_name, datetime.now(timezone.utc), datetime.now(timezone.utc)))
+    
+    conn.commit()
+    conn.close()
+    
 # Запускаем Flask в отдельном потоке
 threading.Thread(target=run_flask, daemon=True).start()
 
@@ -155,6 +216,17 @@ skip_kb = InlineKeyboardMarkup(inline_keyboard=[
 
 @dp.message(Command("start"))
 async def start(message: types.Message):
+    user = message.from_user
+    user_id = user.id
+    username = user.username
+    first_name = user.first_name
+    last_name = user.last_name or ""
+    
+    # Сохраняем пользователя в базу данных
+    save_user_to_db(user_id, username, first_name, last_name)
+    
+    # Отправляем уведомление администратору
+    await notify_admin_about_new_user(user_id, username, first_name, last_name)
     await message.answer(f"Приветствуем неравнодушных! 🫡\n\n{DESCRIPTION}", reply_markup=main_kb)
 
 @dp.message(F.text == "ℹ️ О проекте")
