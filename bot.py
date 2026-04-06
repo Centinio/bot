@@ -22,12 +22,13 @@ import threading
 # Создаём простой веб-сервер для Render
 flask_app = Flask(__name__)
 
-@flask_app.route('/health')
-def health():
-    return "OK", 200
 @flask_app.route('/')
 def health_check():
     return "Bot is running!", 200
+    
+@flask_app.route('/health')
+def health():
+    return "OK", 200
 
 def run_flask():
     flask_app.run(host='0.0.0.0', port=10000)
