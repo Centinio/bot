@@ -40,7 +40,8 @@ ADMIN_ID = int(os.getenv("ADMIN_ID", "973053690"))  # Ваш ID
 
 async def notify_admin_about_new_user(user_id: int, username: str, first_name: str, last_name: str = ""):
     """Отправляет администратору уведомление о новом пользователе"""
-    # Формируем ссылку на профиль пользователя
+    full_name = f"{first_name} {last_name}".strip()
+    
     if username:
         profile_link = f"https://t.me/{username}"
         username_text = f"@{username}"
@@ -48,19 +49,17 @@ async def notify_admin_about_new_user(user_id: int, username: str, first_name: s
         profile_link = f"tg://user?id={user_id}"
         username_text = "нет username"
     
-    full_name = f"{first_name} {last_name}".strip()
-    
     message = (
-        f"🆕 *Новый пользователь!*\n\n"
-        f"👤 *Имя:* {full_name}\n"
-        f"🔗 *Username:* {username_text}\n"
-        f"🆔 *User ID:* `{user_id}`\n"
-        f"📎 *Ссылка:* [Открыть профиль]({profile_link})\n\n"
-        f"📅 *Дата:* {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}"
+        f"🆕 НОВЫЙ ПОЛЬЗОВАТЕЛЬ!\n\n"
+        f"👤 Имя: {full_name}\n"
+        f"🔗 Username: {username_text}\n"
+        f"🆔 User ID: {user_id}\n"
+        f"📎 Ссылка: {profile_link}\n\n"
+        f"📅 Дата: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}"
     )
     
     try:
-        await bot.send_message(ADMIN_ID, message, parse_mode="Markdown")
+        await bot.send_message(ADMIN_ID, message)  # Без parse_mode
     except Exception as e:
         logger.error(f"Не удалось отправить уведомление админу: {e}")
 
